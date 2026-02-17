@@ -323,8 +323,9 @@
       return;
     }
 
-    const semesterAtt = totalCredits * factor; // per spec
-    const newQCS = existingQCS + totalQPV;
+    const semesterAtt = totalCredits * factor;
+    const semesterQPV = totalQPV * factor;
+    const newQCS = existingQCS + semesterQPV;
     const newAtt = existingAtt + semesterAtt;
     const denom = newAtt - nonQ;
 
@@ -341,7 +342,7 @@
     // Display
     document.getElementById("totalCredits").textContent = fmt(totalCredits, 2);
     document.getElementById("semesterAtt").textContent = fmt(semesterAtt, 2);
-    document.getElementById("semesterQPV").textContent = fmt(totalQPV, 2);
+    document.getElementById("semesterQPV").textContent = fmt(semesterQPV, 2);
 
     document.getElementById("newQCS").textContent = fmt(newQCS, 2);
     document.getElementById("newAtt").textContent = fmt(newAtt, 2);
