@@ -199,6 +199,7 @@ input[type=number] {
           <div class="v" id="newQCA">—</div>
         </div>
       </div>
+
       <div id="residualWrap" class="resultGrid" style="margin-top:12px;" hidden>
         <div class="resultBox">
           <div class="k">Residual QCA (F grades treated as C3)</div>
@@ -344,6 +345,7 @@ input[type=number] {
 
   // --- Calculation ---
   function calculate() {
+    document.getElementById("residualWrap").hidden = true;
     setMsg("");
 
     const year = Number(document.getElementById("year").value);
@@ -387,8 +389,8 @@ input[type=number] {
       totalQPV += gv * credits;
 
       // Residual logic: treat F as C3 (2.0)
-      if (grade === "F") {
-        hasF = true;
+      if (grade === "F" && credits > 0) {
+      hasF = true;
         residualTotalQPV_raw += gradeToValue.get("C3") * credits; // 2.0 * credits
       } else {
         residualTotalQPV_raw += gv * credits;
