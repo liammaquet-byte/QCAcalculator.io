@@ -200,20 +200,13 @@ input[type=number] {
         </div>
       </div>
 
-      <div id="residualWrap" class="resultGrid" style="margin-top:12px;" hidden>
+      <div id="residualWrap" class="resultGrid" style="margin-top:12px; display:none;">
         <div class="resultBox">
           <div class="k">Residual QCA (F grades treated as C3)</div>
           <div class="v" id="residualQCA">—</div>
         </div>
-        <div class="resultBox">
-          <div class="k">Residual New QCS</div>
-          <div class="v" id="residualNewQCS">—</div>
-        </div>
-        <div class="resultBox">
-          <div class="k">Residual Semester QPV</div>
-          <div class="v" id="residualSemesterQPV">—</div>
-        </div>
       </div>
+
 
       <div class="footer tiny">
         Grade values: A1=4, A2=3.6, B1=3.2, B2=3, B3=2.8, C1=2.6, C2=2.4, C3=2, D1=1.6, D2=1.2, F=0.
@@ -336,17 +329,23 @@ input[type=number] {
     ["totalCredits","semesterAtt","semesterQPV","newQCS","newAtt","newQCA"].forEach(id => {
       document.getElementById(id).textContent = "—";
     });
-      // Residual section
-    document.getElementById("residualWrap").hidden = true;
-    ["residualQCA","residualNewQCS","residualSemesterQPV"].forEach(id => {
-      document.getElementById(id).textContent = "—";
-    });
+
+    // Residual (force hide)
+    const rw = document.getElementById("residualWrap");
+    if (rw) rw.style.display = "none";
+    const rq = document.getElementById("residualQCA");
+    if (rq) rq.textContent = "—";
   }
+
 
   // --- Calculation ---
   function calculate() {
     document.getElementById("residualWrap").hidden = true;
     setMsg("");
+    const residualWrap = document.getElementById("residualWrap");
+    const residualQCAEl = document.getElementById("residualQCA");
+    if (residualWrap) residualWrap.style.display = "none";
+    if (residualQCAEl) residualQCAEl.textContent = "—";
 
     const year = Number(document.getElementById("year").value);
     const factor = factorFromYear(year);
@@ -388,13 +387,15 @@ input[type=number] {
       totalCredits += credits;
       totalQPV += gv * credits;
 
-      // Residual logic: treat F as C3 (2.0)
+      // (you already do: totalCredits += credits; totalQPV += gv * credits;)
+
       if (grade === "F" && credits > 0) {
-      hasF = true;
-        residualTotalQPV_raw += gradeToValue.get("C3") * credits; // 2.0 * credits
+        hasF = true;
+        residualTotalQPV_raw += gradeToValue.get("C3") * credits; // treat F as C3 (2.0)
       } else {
         residualTotalQPV_raw += gv * credits;
       }
+
 
     }
 
@@ -410,26 +411,21 @@ input[type=number] {
     const newAtt = existingAtt + semesterAtt;
     const denom = newAtt - nonQ;
 
-    // Residual: only show if at least one F grade was entered (with credits > 0)
     if (hasF) {
-      const residualSemesterQPV = residualTotalQPV_raw * factor;
+      const residualSemesterQPV = residualTotalQPV_raw * factor;   // same factor rule
       const residualNewQCS = existingQCS + residualSemesterQPV;
 
-      let residualQcaText = "";
+      let residualText;
       if (denom <= 0) {
-        residualQcaText = "Undefined (New Att − Non-Q must be > 0)";
+        residualText = "Undefined (New Att − Non-Q must be > 0)";
       } else {
-        const residualQCA = residualNewQCS / denom;
-        residualQcaText = fmt(residualQCA, 2); // 2 decimals as requested
+        residualText = fmt(residualNewQCS / denom, 2); // 2 decimals
       }
 
-      document.getElementById("residualWrap").hidden = false;
-      document.getElementById("residualQCA").textContent = residualQcaText;
-      document.getElementById("residualNewQCS").textContent = fmt(residualNewQCS, 2);
-      document.getElementById("residualSemesterQPV").textContent = fmt(residualSemesterQPV, 2);
-    } else {
-      document.getElementById("residualWrap").hidden = true;
+      residualQCAEl.textContent = residualText;
+      residualWrap.style.display = "grid"; // because resultGrid is a grid layout
     }
+
 
 
     let qcaText = "";
