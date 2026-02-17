@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>QCA / QCS Calculator</title>
+  <style>
+    :root { --border:#e5e7eb; --muted:#6b7280; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; max-width: 920px; }
+    h1 { margin: 0 0 12px; font-size: 24px; }
+    .muted { color: var(--muted); font-size: 13px; line-height: 1.35; }
+    .card { border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+    label { display:block; font-weight: 650; margin: 10px 0 6px; }
+    input, select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 16px; }
+    input[type="number"] { appearance: textfield; }
+    .tabs { display:flex; gap: 10px; margin: 10px 0 14px; }
+    .tabbtn {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+    }
+    .tabbtn[aria-selected="true"] { border-color:#111827; }
+    .actions { display:flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    button {
+      border: 1px solid var(--border);
+      background: #111827;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 15px;
+    }
+    button.secondary { background: #fff; color:#111827; }
+    .modules { margin-top: 8px; }
+    table { width:100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
+    th { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .resultGrid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 14px; }
+    @media (max-width: 820px) { .resultGrid { grid-template-columns: 1fr; } }
+    .resultBox { border:1px solid var(--border); border-radius: 14px; padding: 12px; }
+    .resultBox .k { font-size: 13px; color: var(--muted); font-weight: 700; }
+    .resultBox .v { margin-top: 6px; font-size: 20px; font-weight: 800; }
+    .warn { margin-top: 10px; padding: 10px 12px; border: 1px solid #f59e0b33; background:#fffbeb; border-radius: 12px; color:#92400e; }
+    .oknote { margin-top: 10px; padding: 10px 12px; border: 1px solid #10b98133; background:#ecfdf5; border-radius: 12px; color:#065f46; }
+    .footer { margin-top: 14px; }
+    .tiny { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+
+<body>
+  <h1>QCS / Att Hours / QCA Calculator</h1>
+  <div class="muted">All calculations run in your browser. Nothing is uploaded or stored.</div>
+
+  <div class="tabs" role="tablist" aria-label="Pages">
+    <button class="tabbtn" id="tab1" role="tab" aria-selected="true" aria-controls="page1">Page 1: Existing totals</button>
+    <button class="tabbtn" id="tab2" role="tab" aria-selected="false" aria-controls="page2">Page 2: Semester modules</button>
+  </div>
+
+  <div id="page1" class="card" role="tabpanel" aria-labelledby="tab1">
+    <h2 style="margin:0 0 10px; font-size:18px;">Page 1 — Current values</h2>
+
+    <div class="row">
+      <div>
+        <label for="year">Year</label>
+        <select id="year">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <div class="tiny" id="factorNote" style="margin-top:6px;"></div>
+      </div>
+
+      <div>
+        <label for="nonQ">Non-Q hours</label>
+        <input id="nonQ" type="number" min="0" step="any" value="0" />
+        <div class="tiny" style="margin-top:6px;">Used in: New QCA = New QCS / (New Att Hours − Non-Q hours)</div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="existingQCS">Existing QCS (to-date)</label>
+        <input id="existingQCS" type="number" step="any" value="0" />
+      </div>
+
+      <div>
+        <label for="existingAtt">Existing Att hours (to-date)</label>
+        <input id="existingAtt" type="number" step="any" value="0" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" id="toPage2">Next → Page 2</button>
+      <button class="secondary" id="resetAll1">Reset all</button>
+    </div>
+  </div>
+
+  <div id="page2" class="card" role="tabpanel" aria-labelledby="tab2" hidden>
+    <h2 style="margin:0 0 10px; font-size:18px;">Page 2 — This semester</h2>
+
+    <div class="modules">
+      <div class="muted">Enter up to 5 modules. Leave a module blank (no grade + 0 credits) to ignore it.</div>
+
+      <table aria-label="Modules table">
+        <thead>
+          <tr>
+            <th style="width: 28%;">Module</th>
+            <th style="width: 36%;">Grade</th>
+            <th style="width: 36%;">Credits</th>
+          </tr>
+        </thead>
+        <tbody id="moduleBody"></tbody>
+      </table>
+
+      <div class="actions">
+        <button class="secondary" id="backTo1">← Back to Page 1</button>
+        <button id="calcBtn">Calculate</button>
+        <button class="secondary" id="resetMods">Clear Page 2</button>
+      </div>
+
+      <div id="messages"></div>
+
+      <div class="resultGrid" aria-label="Results">
+        <div class="resultBox">
+          <div class="k">Total semester credits</div>
+          <div class="v" id="totalCredits">—</div>
+        </div>
+        <div class="resultBox">
+          <div class="k">Semester Att hours (factor × credits)</div>
+          <div class="v" id="semesterAtt">—</div>
+        </div>
+        <div class="resultBox">
+          <div class="k">Total semester QPV</div>
+          <div class="v" id="semesterQPV">—</div>
+        </div>
+      </div>
+
+      <div class="resultGrid" style="margin-top:12px;">
+        <div class="resultBox">
+          <div class="k">New QCS</div>
+          <div class="v" id="newQCS">—</div>
+        </div>
+        <div class="resultBox">
+          <div class="k">New Att hours</div>
+          <div class="v" id="newAtt">—</div>
+        </div>
+        <div class="resultBox">
+          <div class="k">New QCA</div>
+          <div class="v" id="newQCA">—</div>
+        </div>
+      </div>
+
+      <div class="footer tiny">
+        Grade values: A1=4, A2=3.6, B1=3.2, B2=3, B3=2.8, C1=2.6, C2=2.4, C3=2, D1=1.6, D2=1.2, F=0.
+      </div>
+    </div>
+  </div>
+
+<script>
+  // --- Grade mapping ---
+  const gradeToValue = new Map([
+    ["A1", 4.0],
+    ["A2", 3.6],
+    ["B1", 3.2],
+    ["B2", 3.0],
+    ["B3", 2.8],
+    ["C1", 2.6],
+    ["C2", 2.4],
+    ["C3", 2.0],
+    ["D1", 1.6],
+    ["D2", 1.2],
+    ["F",  0.0]
+  ]);
+
+  function factorFromYear(year) {
+    return (year === 1 || year === 2) ? 1 : 2;
+  }
+
+  function fmt(x, decimals=2) {
+    if (!Number.isFinite(x)) return "—";
+    return x.toFixed(decimals);
+  }
+
+  function numVal(id) {
+    const el = document.getElementById(id);
+    const v = Number(el.value);
+    return v;
+  }
+
+  function setMsg(html) {
+    const box = document.getElementById("messages");
+    box.innerHTML = html || "";
+  }
+
+  // --- Tabs / pages ---
+  const tab1 = document.getElementById("tab1");
+  const tab2 = document.getElementById("tab2");
+  const page1 = document.getElementById("page1");
+  const page2 = document.getElementById("page2");
+
+  function showPage(n) {
+    const is1 = n === 1;
+    page1.hidden = !is1;
+    page2.hidden = is1;
+    tab1.setAttribute("aria-selected", String(is1));
+    tab2.setAttribute("aria-selected", String(!is1));
+  }
+
+  tab1.addEventListener("click", () => showPage(1));
+  tab2.addEventListener("click", () => showPage(2));
+  document.getElementById("toPage2").addEventListener("click", () => showPage(2));
+  document.getElementById("backTo1").addEventListener("click", () => showPage(1));
+
+  // --- Build module rows (5) ---
+  const moduleBody = document.getElementById("moduleBody");
+  const gradeOptions = `
+    <option value="">(blank)</option>
+    ${Array.from(gradeToValue.keys()).map(g => `<option value="${g}">${g}</option>`).join("")}
+  `;
+
+  for (let i = 1; i <= 5; i++) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><strong>Module ${i}</strong></td>
+      <td>
+        <select id="g${i}" aria-label="Module ${i} grade">
+          ${gradeOptions}
+        </select>
+      </td>
+      <td>
+        <input id="c${i}" aria-label="Module ${i} credits" type="number" min="0" step="any" value="0" />
+      </td>
+    `;
+    moduleBody.appendChild(tr);
+  }
+
+  // --- Factor note ---
+  function updateFactorNote() {
+    const y = Number(document.getElementById("year").value);
+    const f = factorFromYear(y);
+    document.getElementById("factorNote").textContent = `Factor = ${f} (Year ${y})`;
+  }
+  document.getElementById("year").addEventListener("change", updateFactorNote);
+  updateFactorNote();
+
+  // --- Reset buttons ---
+  document.getElementById("resetAll1").addEventListener("click", () => {
+    document.getElementById("year").value = "1";
+    document.getElementById("existingQCS").value = "0";
+    document.getElementById("existingAtt").value = "0";
+    document.getElementById("nonQ").value = "0";
+    updateFactorNote();
+    setMsg(`<div class="oknote">Reset Page 1 values.</div>`);
+  });
+
+  document.getElementById("resetMods").addEventListener("click", () => {
+    for (let i = 1; i <= 5; i++) {
+      document.getElementById(`g${i}`).value = "";
+      document.getElementById(`c${i}`).value = "0";
+    }
+    setMsg(`<div class="oknote">Cleared module inputs.</div>`);
+    clearOutputs();
+  });
+
+  function clearOutputs() {
+    ["totalCredits","semesterAtt","semesterQPV","newQCS","newAtt","newQCA"].forEach(id => {
+      document.getElementById(id).textContent = "—";
+    });
+  }
+
+  // --- Calculation ---
+  function calculate() {
+    setMsg("");
+
+    const year = Number(document.getElementById("year").value);
+    const factor = factorFromYear(year);
+
+    const existingQCS = numVal("existingQCS");
+    const existingAtt = numVal("existingAtt");
+    const nonQ = numVal("nonQ");
+
+    // Basic validation
+    const errs = [];
+    if (!Number.isFinite(existingQCS)) errs.push("Existing QCS must be a number.");
+    if (!Number.isFinite(existingAtt) || existingAtt < 0) errs.push("Existing Att hours must be a number ≥ 0.");
+    if (!Number.isFinite(nonQ) || nonQ < 0) errs.push("Non-Q hours must be a number ≥ 0.");
+
+    let totalCredits = 0;
+    let totalQPV = 0;
+
+    for (let i = 1; i <= 5; i++) {
+      const grade = document.getElementById(`g${i}`).value;
+      const credits = Number(document.getElementById(`c${i}`).value);
+
+      if (!Number.isFinite(credits) || credits < 0) {
+        errs.push(`Module ${i} credits must be a number ≥ 0.`);
+        continue;
+      }
+
+      // If grade blank or credits 0 => ignore module
+      if (!grade || credits === 0) continue;
+
+      const gv = gradeToValue.get(grade);
+      if (gv === undefined) {
+        errs.push(`Module ${i} grade is not recognized.`);
+        continue;
+      }
+
+      totalCredits += credits;
+      totalQPV += gv * credits;
+    }
+
+    if (errs.length) {
+      setMsg(`<div class="warn"><strong>Please fix:</strong><ul>${errs.map(e => `<li>${e}</li>`).join("")}</ul></div>`);
+      clearOutputs();
+      return;
+    }
+
+    const semesterAtt = totalCredits * factor; // per spec
+    const newQCS = existingQCS + totalQPV;
+    const newAtt = existingAtt + semesterAtt;
+    const denom = newAtt - nonQ;
+
+    let qcaText = "";
+    if (denom <= 0) {
+      qcaText = "Undefined (New Att − Non-Q must be > 0)";
+      setMsg(`<div class="warn">New QCA cannot be computed because (New Att hours − Non-Q hours) is ${fmt(denom,2)} (must be > 0).</div>`);
+    } else {
+      const newQCA = newQCS / denom;
+      qcaText = fmt(newQCA, 3);
+      setMsg(`<div class="oknote">Calculated successfully.</div>`);
+    }
+
+    // Display
+    document.getElementById("totalCredits").textContent = fmt(totalCredits, 2);
+    document.getElementById("semesterAtt").textContent = fmt(semesterAtt, 2);
+    document.getElementById("semesterQPV").textContent = fmt(totalQPV, 2);
+
+    document.getElementById("newQCS").textContent = fmt(newQCS, 2);
+    document.getElementById("newAtt").textContent = fmt(newAtt, 2);
+    document.getElementById("newQCA").textContent = qcaText;
+  }
+
+  document.getElementById("calcBtn").addEventListener("click", calculate);
+
+  // Optional: auto-calc when user edits values (nice for small tools)
+  // Uncomment if you want live updates:
+  // ["year","existingQCS","existingAtt","nonQ","g1","g2","g3","g4","g5","c1","c2","c3","c4","c5"].forEach(id => {
+  //   document.getElementById(id).addEventListener("input", calculate);
+  //   document.getElementById(id).addEventListener("change", calculate);
+  // });
+
+  // Start on Page 1
+  showPage(1);
+</script>
+</body>
+</html>
