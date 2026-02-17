@@ -110,16 +110,20 @@
 
     /* Residual QCA highlight */
     .resultBox.residual {
-      border-color: #fecaca;
-      background: #fef2f2;
+      box-shadow: 0 1px 6px rgba(127, 29, 29, 0.10);
     }
+
     .resultBox.residual .k { color: #991b1b; }
     .resultBox.residual .v { color: #7f1d1d; }
 
     /* Center residual section */
-    #residualWrap { justify-items: center; }
-    #residualWrap .resultBox { max-width: 320px; width: 100%; }
-
+  
+    #residualWrap .resultBox {
+      grid-column: 1 / -1;   /* span all columns */
+      justify-self: center; /* center within the full width */
+      max-width: 320px;
+      width: 100%;
+    }
     /* Residual explanation text */
     .residual-note {
       text-align: center;
@@ -131,6 +135,36 @@
       grid-column: 1 / -1;
       justify-self: center;
     }
+    .resultBox.primary {
+      border-color: #93c5fd;      /* soft blue border */
+      background: #eff6ff;        /* very light blue */
+    }
+
+    .resultBox.primary .k {
+      color: #1d4ed8;             /* muted blue label */
+    }
+
+    .resultBox.primary .v {
+      font-size: 28px;            /* make the main number bigger */
+    }
+    .divider {
+      border: 0;
+      border-top: 1px solid #e5e7eb;
+      margin: 14px 0;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #fee2e2;
+      color: #7f1d1d;
+    }
+
+
+
   </style>
 </head>
 
@@ -215,26 +249,30 @@
           <div class="v" id="semesterQPV">—</div>
         </div>
       </div>
+      
+      <hr class="divider" />
+      <div style="margin-top:14px; font-weight:800;">Key results</div>
 
       <div class="resultGrid" style="margin-top:12px;">
+        <div class="resultBox primary">
+          <div class="k">Current QCA</div>
+          <div class="v" id="newQCA">—</div>
+        </div>
         <div class="resultBox">
-          <div class="k">New QCS</div>
+          <div class="k">QCS</div>
           <div class="v" id="newQCS">—</div>
         </div>
         <div class="resultBox">
-          <div class="k">New Att hours</div>
+          <div class="k">Att hours</div>
           <div class="v" id="newAtt">—</div>
-        </div>
-        <div class="resultBox">
-          <div class="k">New QCA</div>
-          <div class="v" id="newQCA">—</div>
         </div>
       </div>
 
       <!-- Residual section (only displayed if at least one F is entered) -->
       <div id="residualWrap" class="resultGrid" style="margin-top:12px; display:none;">
         <div class="resultBox residual">
-          <div class="k">Residual QCA (F grades treated as C3)</div>
+          <div class="k">Residual QCA</div>
+          <div class="badge">If F grades were C3</div>
           <div class="v" id="residualQCA">—</div>
         </div>
 
