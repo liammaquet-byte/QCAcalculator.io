@@ -213,8 +213,7 @@
     tab2.setAttribute("aria-selected", String(!is1));
   }
 
-  tab1.addEventListener("click", () => showPage(1));
-  tab2.addEventListener("click", () => showPage(2));
+
   document.getElementById("toPage2").addEventListener("click", () => showPage(2));
   document.getElementById("backTo1").addEventListener("click", () => showPage(1));
 
@@ -335,7 +334,7 @@
       setMsg(`<div class="warn">New QCA cannot be computed because (New Att hours − Non-Q hours) is ${fmt(denom,2)} (must be > 0).</div>`);
     } else {
       const newQCA = newQCS / denom;
-      qcaText = fmt(newQCA, 3);
+      qcaText = fmt(newQCA, 2);
       setMsg(`<div class="oknote">Calculated successfully.</div>`);
     }
 
