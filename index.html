@@ -241,12 +241,12 @@
           <div class="v" id="totalCredits">—</div>
         </div>
         <div class="resultBox">
-          <div class="k">Semester Att hours (factor × credits)</div>
-          <div class="v" id="semesterAtt">—</div>
-        </div>
-        <div class="resultBox">
           <div class="k">Total semester QPV</div>
           <div class="v" id="semesterQPV">—</div>
+        </div>
+        <div class="resultBox">
+          <div class="k">Semester QCA</div>
+          <div class="v" id="semesterQCA">—</div>
         </div>
       </div>
       
@@ -397,7 +397,7 @@
   });
 
   function clearOutputs() {
-    ["totalCredits","semesterAtt","semesterQPV","newQCS","newAtt","newQCA"].forEach(id => {
+    ["totalCredits","semesterQCA","semesterQPV","newQCS","newAtt","newQCA"].forEach(id => {
       document.getElementById(id).textContent = "—";
     });
 
@@ -480,6 +480,12 @@
     // Apply factor rule to semester QPV
     const semesterAtt = totalCredits * factor;
     const semesterQPV = totalQPV_raw * factor;
+    let semesterQCAText = "";
+    if (semesterAtt > 0) {
+      semesterQCAText = fmt(semesterQPV / semesterAtt, 2);
+    } else {
+      semesterQCAText = "—";
+    }
 
     const newQCS = existingQCS + semesterQPV;
     const newAtt = existingAtt + semesterAtt;
@@ -514,8 +520,9 @@
 
     // Display
     document.getElementById("totalCredits").textContent = fmt(totalCredits, 2);
-    document.getElementById("semesterAtt").textContent = fmt(semesterAtt, 2);
     document.getElementById("semesterQPV").textContent = fmt(semesterQPV, 2);
+    document.getElementById("semesterQCA").textContent = semesterQCAText;
+
 
     document.getElementById("newQCS").textContent = fmt(newQCS, 2);
     document.getElementById("newAtt").textContent = fmt(newAtt, 2);
