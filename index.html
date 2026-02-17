@@ -50,7 +50,41 @@
     .oknote { margin-top: 10px; padding: 10px 12px; border: 1px solid #10b98133; background:#ecfdf5; border-radius: 12px; color:#065f46; }
     .footer { margin-top: 14px; }
     .tiny { font-size: 12px; color: var(--muted); } 
-    
+    .disclaimer {
+  margin-top: 18px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: #fafafa;
+}
+
+.disclaimer summary {
+  cursor: pointer;
+  font-weight: 650;
+  list-style: none;
+}
+
+.disclaimer summary::-webkit-details-marker {
+  display: none;
+}
+
+.disclaimer summary::after {
+  content: " ▸";
+  float: right;
+  transition: transform 0.2s ease;
+}
+
+.disclaimer[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.disclaimer p {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.45;
+}
+
   </style>
 </head>
 
